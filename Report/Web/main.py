@@ -178,7 +178,7 @@ with tab1:
             if st.button('Push', key='push', width= 'stretch'):
                 if value and value.strip():
                     st.session_state['array_stack'].append(value.strip())
-                    st.session_state['last_operation'] = f"[PUSH]: Added '{value.strip()}' to stack"
+                    st.session_state['last_operation'] = f"[PUSH]: Added '" + value.strip() + "' to stack"
                     st.session_state['operation_result'] = "success"
                     # Clear input by rerunning
                     st.rerun()
@@ -191,8 +191,10 @@ with tab1:
             if st.button('Pop', key='pop', width= 'stretch'):
                 if st.session_state['array_stack']:
                     popped_value = st.session_state['array_stack'].pop()
-                    st.session_state['last_operation'] = f"[POP]: Removed '{popped_value}'"
+                    st.session_state['last_operation'] = "[POP]: Removed '" + popped_value + "' from stack"
                     st.session_state['operation_result'] = "success"
+                    # Clear input by rerunning
+                    st.rerun()
                 else:
                     st.session_state['last_operation'] = "[POP]: Stack is empty, cannot pop"
                     st.session_state['operation_result'] = "error"
@@ -253,7 +255,7 @@ with tab1:
                     # Create expander title with TOP indicator
                     if i == len(st.session_state['array_stack']) - 1:
                         expander_title = f"Element {i + 1} (TOP)"
-                        expander_expanded = False
+                        expander_expanded = True
                     else:
                         expander_title = f"Element {i + 1}"
                         expander_expanded = False
