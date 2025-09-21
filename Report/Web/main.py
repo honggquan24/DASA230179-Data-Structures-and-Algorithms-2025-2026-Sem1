@@ -160,15 +160,12 @@ with tab1:
         st.session_state['operation_result'] = ""
     
     col1, col2 = st.columns([5, 5])
-    
-    words = ["apple", "zebra", "quantum", "banana", "galaxy", "penguin", "laptop", "oxygen"]
-    
-    random_word = random.choice(words)
+        
     with col1: 
         st.write("**Operations:**")
         
         # Input for new value
-        value = st.text_input("Enter value:", key="stack_input", value= random_word)
+        value = st.text_input("Enter value:", key="stack_input")
         
         # Create buttons in columns for better layout
         btn_col1, btn_col2, btn_col3, btn_col4, btn_col5, btn_col6 = st.columns(6)
