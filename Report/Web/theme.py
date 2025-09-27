@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-THEME = {
+THEME_DARKMODE = {
     "bg1":    "#0f0f23",
     "bg2":    "#1a1a2e",
     "bg3":    "#191b1f",
@@ -13,11 +13,79 @@ THEME = {
     "blur_px": "10px", 
 }
 
+THEME_LIGHTMODE = {
+    "bg1":    "#ffffff",      
+    "bg2":    "#f5f7fa",      
+    "bg3":    "#eef2f6",      
+    "text":   "#1a1a1a",      
+    "muted":  "#6b7280",      
+    "accent": "#3b82f6",      
+    "accent2":"#06b6d4",      
+    "gold":   "#f59e0b",      
+    "panel_alpha": "0.8",     
+    "blur_px": "8px",         
+}
 
-def get_css(theme: dict = THEME) -> str:
+
+def get_css(theme: dict) -> str:
     t = theme
 
-    # dedent(): loại bỏ thụt lề thừa trong chuỗi nhiều dòng để CSS gọn gàng.
+    # Xác định nếu là light mode để điều chỉnh CSS
+    is_light = t["bg1"] == "#ffffff" or t["text"] == "#1a1a1a"
+
+    # Màu nền panel chính — trong light mode nên đậm hơn để text nổi
+    panel_bg = "rgba(255,255,255, var(--panel-alpha))" if not is_light else "rgba(255,255,255, 0.85)"
+    panel_border = "rgba(255,255,255, 0.1)" if not is_light else "rgba(0,0,0,0.08)"
+
+    # Màu shadow cho main content — tối hơn trong light mode
+    shadow_color = "rgba(0, 0, 0, 0.3)" if not is_light else "rgba(0, 0, 0, 0.08)"
+
+    # Màu nền gradient cho chữ heading — giữ nguyên nhưng điều chỉnh shadow cho dễ đọc
+    heading_shadow = (
+        "0 0 30px color-mix(in oklab, var(--accent) 35%, transparent)" if not is_light
+        else "0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent)"
+    )
+
+    # Màu nền contact section
+    contact_bg = (
+        "color-mix(in oklab, var(--accent) 15%, transparent)" if not is_light
+        else "color-mix(in oklab, var(--accent) 5%, white)"
+    )
+    contact_border = (
+        "color-mix(in oklab, var(--accent) 40%, transparent)" if not is_light
+        else "color-mix(in oklab, var(--accent) 20%, white)"
+    )
+    contact_shadow = (
+        "0 4px 20px color-mix(in oklab, var(--accent) 12%, transparent)" if not is_light
+        else "0 2px 8px color-mix(in oklab, var(--accent) 8%, transparent)"
+    )
+
+    # Social container background
+    social_container_bg = (
+        "rgba(255,255,255,0.05)" if not is_light else "rgba(0,0,0,0.03)"
+    )
+    social_container_border = (
+        "rgba(255,255,255,0.1)" if not is_light else "rgba(0,0,0,0.08)"
+    )
+
+    # Gradient cho scrollbar thumb
+    scrollbar_thumb_bg = (
+        "linear-gradient(135deg, var(--accent), var(--accent2))" if not is_light
+        else "linear-gradient(135deg, var(--accent), var(--accent2))"
+    )
+    scrollbar_track_bg = (
+        "rgba(255,255,255,0.1)" if not is_light else "rgba(0,0,0,0.05)"
+    )
+
+    # Input và Button styling - đồng bộ với theme
+    input_bg = "rgba(255,255,255,0.08)" if not is_light else "rgba(255,255,255,0.9)"
+    input_border = "rgba(255,255,255,0.15)" if not is_light else "rgba(0,0,0,0.12)"
+    input_focus_border = "var(--accent)" if not is_light else "var(--accent)"
+    
+    button_bg = "linear-gradient(135deg, var(--accent), var(--accent2))" if not is_light else "linear-gradient(135deg, var(--accent), var(--accent2))"
+    button_text = "#ffffff" if not is_light else "#ffffff"
+    button_shadow = "0 4px 15px color-mix(in oklab, var(--accent) 25%, transparent)" if not is_light else "0 2px 8px color-mix(in oklab, var(--accent) 20%, transparent)"
+
     return dedent(f"""
     <head>
         <link rel="stylesheet"
@@ -47,7 +115,7 @@ def get_css(theme: dict = THEME) -> str:
         color: var(--text);
     }}
 
-    /* Animated background particles */
+    /* Animated background particles — Ẩn trong light mode để tránh rối mắt */
     .stApp::before {{
         content: '';
         position: fixed;
@@ -60,6 +128,7 @@ def get_css(theme: dict = THEME) -> str:
         animation: sparkle 20s linear infinite;
         pointer-events: none;
         z-index: 0;
+        {'display: none;' if is_light else ''}
     }}
     @keyframes sparkle {{
         0% {{ transform: translateY(0px) rotate(0deg); opacity: 0.7; }}
@@ -71,19 +140,19 @@ def get_css(theme: dict = THEME) -> str:
     .main-content {{
         position: relative; z-index: 1;
         backdrop-filter: blur(var(--blur));
-        background: rgba(255, 255, 255, var(--panel-alpha));
+        background: {panel_bg};
         border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid {panel_border};
         padding: 2rem; margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px {shadow_color};
     }}
 
     /* Profile section styling */
     .profile-section {{
-        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        background: {'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))' if not is_light else 'linear-gradient(145deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01))'};
         border-radius: 20px; padding: 2rem;
-        border: 1px solid rgba(255,255,255,0.15);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        border: 1px solid {panel_border};
+        box-shadow: 0 8px 32px {shadow_color};
         backdrop-filter: blur(var(--blur));
         position: relative; overflow: hidden;
     }}
@@ -93,6 +162,7 @@ def get_css(theme: dict = THEME) -> str:
         width: 200%; height: 200%;
         background: conic-gradient(transparent, color-mix(in oklab, var(--accent) 30%, transparent), transparent);
         animation: rotate 10s linear infinite; z-index: -1;
+        {'opacity: 0.3;' if is_light else 'opacity: 0.7;'}
     }}
     @keyframes rotate {{ 0% {{transform: rotate(0deg);}} 100% {{transform: rotate(360deg);}} }}
 
@@ -101,7 +171,7 @@ def get_css(theme: dict = THEME) -> str:
         background: linear-gradient(135deg, var(--accent), var(--accent2), var(--gold));
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         font-weight: 700;
-        text-shadow: 0 0 30px color-mix(in oklab, var(--accent) 35%, transparent);
+        text-shadow: {heading_shadow};
     }}
     .main-title {{ font-size: 3.5rem !important; margin-bottom: .5rem !important; animation: glow 2s ease-in-out infinite alternate; }}
     .subtitle   {{ font-size: 1.8rem !important; color: var(--accent) !important; margin-bottom: 1rem !important; font-weight: 500 !important; }}
@@ -121,10 +191,10 @@ def get_css(theme: dict = THEME) -> str:
 
     /* Contact section styling */
     .contact-section {{
-        background: color-mix(in oklab, var(--accent) 15%, transparent);
+        background: {contact_bg};
         border-radius: 15px; padding: 1.5rem; margin: 2rem 0;
-        border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
-        box-shadow: 0 4px 20px color-mix(in oklab, var(--accent) 12%, transparent);
+        border: 1px solid {contact_border};
+        box-shadow: {contact_shadow};
     }}
     .contact-item {{
         display: flex; align-items: center; margin: .8rem 0;
@@ -135,9 +205,9 @@ def get_css(theme: dict = THEME) -> str:
 
     /* Social icons styling */
     .social-container {{
-        background: rgba(255,255,255,0.05);
+        background: {social_container_bg};
         border-radius: 15px; padding: 1.5rem; text-align: center;
-        border: 1px solid rgba(255,255,255,0.1); margin-top: 2rem;
+        border: 1px solid {social_container_border}; margin-top: 2rem;
     }}
     .social-icons {{
         display: flex; justify-content: center; gap: 2rem; padding: 1rem 0;
@@ -163,22 +233,22 @@ def get_css(theme: dict = THEME) -> str:
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {{
         display: flex;
-        flex-wrap: nowrap;            /* không bị xuống hàng, có thể kéo ngang */
+        flex-wrap: nowrap;
         justify-content: space-between;
         gap: 10px;
         width: 100%;
         padding: 10px;
         border-radius: 16px;
-        background: rgba(255,255,255,var(--panel-alpha));
-        border: 1px solid rgba(255,255,255,0.10);
+        background: {panel_bg};
+        border: 1px solid {panel_border};
         backdrop-filter: blur(var(--blur));
-        overflow-x: auto;             /* cho phép cuộn ngang khi thiếu chỗ */
-        scrollbar-width: none;        /* ẩn scrollbar trên Firefox */
+        overflow-x: auto;
+        scrollbar-width: none;
     }}
 
     .stTabs [data-baseweb="tab"] {{
-        flex: 1 1 auto;               /* tab giãn đều theo chiều ngang */
-        min-width: 110px;             /* không quá nhỏ */
+        flex: 1 1 auto;
+        min-width: 110px;
         height: 44px;
         padding: 0 16px;
         border-radius: 12px;
@@ -196,6 +266,109 @@ def get_css(theme: dict = THEME) -> str:
         box-shadow: 0 4px 15px color-mix(in oklab, var(--accent) 20%, transparent);
     }}
 
+    /* Input Field Styling - Đồng bộ với theme */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stSelectbox > div > div > div,
+    input[type="text"],
+    input[type="number"],
+    textarea {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+        color: var(--text) !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.3s ease !important;
+        backdrop-filter: blur(var(--blur)) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }}
+
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    textarea:focus {{
+        border: 2px solid {input_focus_border} !important;
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent) !important;
+        outline: none !important;
+        transform: translateY(-1px) !important;
+    }}
+
+    .stTextInput > div > div > input::placeholder,
+    .stNumberInput > div > div > input::placeholder,
+    .stTextArea > div > div > textarea::placeholder {{
+        color: var(--muted) !important;
+        opacity: 0.8 !important;
+    }}
+
+    /* Button styling - Đồng bộ hoàn toàn với theme */
+    .stButton button,
+    button[data-testid="baseButton-primary"],
+    button[data-testid="baseButton-secondary"] {{
+        background: rgba(255,255,255,0.0) !important;
+        color: {button_text} !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        font-family: 'Inter', sans-serif !important;
+        transition: all 0.3s ease !important;
+        box-shadow: {button_shadow} !important;
+        text-transform: none !important;
+        letter-spacing: 0.5px !important;
+        cursor: pointer !important;
+    }}
+
+    .stButton button:hover,
+    button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="baseButton-secondary"]:hover {{
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 6px 20px color-mix(in oklab, var(--accent) 35%, transparent) !important;
+        background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
+    }}
+
+    .stButton button:active,
+    button[data-testid="baseButton-primary"]:active,
+    button[data-testid="baseButton-secondary"]:active {{
+        transform: translateY(0) scale(1) !important;
+        box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent) !important;
+    }}
+
+    /* Streamlit specific button fixes */
+    .stDownloadButton button {{
+        background: linear-gradient(135deg, var(--gold), #ffa000) !important;
+        color: white !important;
+    }}
+
+    .stDownloadButton button:hover {{
+        background: linear-gradient(135deg, #ffa000, var(--gold)) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+    }}
+
+    /* Generic buttons (dialogs, forms, etc.) */
+    button[data-baseweb="button"] {{
+        background: {input_bg} !important;
+        color: var(--text) !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        margin: 0.25rem !important;
+        transition: all 0.3s ease !important;
+        font-family: 'Inter', sans-serif !important;
+    }}
+
+    button[data-baseweb="button"]:hover {{
+        background: var(--accent) !important;
+        color: white !important;
+        transform: translateY(-1px) !important;
+        border-color: var(--accent) !important;
+    }}
+
     /* Decorative line */
     .decoration-line {{
         height: 2px;
@@ -207,9 +380,10 @@ def get_css(theme: dict = THEME) -> str:
         50% {{ opacity: 1; transform: scaleX(1.02); }}
     }}
 
-    /* Floating elements */
+    /* Floating elements — Ẩn trong light mode */
     .floating-element {{
         position: absolute; border-radius: 50%; opacity: 0.1; animation: float 6s ease-in-out infinite;
+        {'display: none;' if is_light else ''}
     }}
     .floating-element:nth-child(1) {{ width: 80px; height: 80px; top: 10%; right: 10%; background: var(--accent); animation-delay: 0s; }}
     .floating-element:nth-child(2) {{ width: 60px; height: 60px; top: 60%; right: 20%; background: var(--accent2); animation-delay: 2s; }}
@@ -222,8 +396,31 @@ def get_css(theme: dict = THEME) -> str:
 
     /* Scrollbar */
     ::-webkit-scrollbar {{ width: 8px; }}
-    ::-webkit-scrollbar-track {{ background: rgba(255,255,255,0.1); border-radius: 10px; }}
-    ::-webkit-scrollbar-thumb {{ background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; }}
+    ::-webkit-scrollbar-track {{ background: {scrollbar_track_bg}; border-radius: 10px; }}
+    ::-webkit-scrollbar-thumb {{ background: {scrollbar_thumb_bg}; border-radius: 10px; }}
     ::-webkit-scrollbar-thumb:hover {{ background: linear-gradient(135deg, var(--accent2), var(--accent)); }}
+
+    /* Additional fixes for stack display area */
+    .stAlert {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+        color: var(--text) !important;
+        backdrop-filter: blur(var(--blur)) !important;
+    }}
+
+    /* Ensure all text elements are properly colored */
+    p, span, div, label {{
+        color: var(--text) !important;
+    }}
+
+    /* Fix for metric containers */
+    .stMetric {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+        padding: 1rem !important;
+        backdrop-filter: blur(var(--blur)) !important;
+    }}
     </style>
     """).strip()
