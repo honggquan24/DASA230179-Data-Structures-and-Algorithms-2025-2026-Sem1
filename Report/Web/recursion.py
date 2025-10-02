@@ -35,7 +35,7 @@ def render_stack_tab():
             st.session_state['stack_built'] = False
             st.rerun()
 
-    # Dùng placeholder để xóa sạch UI cũ
+    # Placeholder for stack visualization
     stack_placeholder = col2.empty()
 
     if st.session_state['is_calculating']:
@@ -46,28 +46,23 @@ def render_stack_tab():
             with col1:
                 st.write("**Phase 1: Building Call Stack**")
             
-            # Build stack từ factorial(n) xuống factorial(1)
+            # Build stack from factorial(n) down to factorial(1)
             for i in range(factorial_n, 0, -1):
                 call_info = {
                     'function': f'factorial({i})',
                     'parameter': i,
                     'status': 'waiting',
                     'result': None,
-                    'call_order': factorial_n - i + 1,
                     'depth': factorial_n - i
                 }
                 st.session_state['recursion_stack'].append(call_info)
                 
-                # Ghi đè lên placeholder 
+                # Update stack visualization
                 with stack_placeholder.container():
                     st.write("**Call Stack:**")
                     for idx, call in enumerate(reversed(st.session_state['recursion_stack'])):
-                        if idx == 0:  
-                            expander_title = f"{call['function']} (TOP)"
-                            expanded_fl = True
-                        else:
-                            expander_title = f"{call['function']}"
-                            expanded_fl = False
+                        expander_title = f"{call['function']} (TOP)" if idx == 0 else call['function']
+                        expanded_fl = (idx == 0)
                         
                         with st.expander(expander_title, expanded=expanded_fl):
                             st.write(f"**Function:** `{call['function']}`")
@@ -79,8 +74,8 @@ def render_stack_tab():
                 # Status update
                 placeholder.info(f"Pushing factorial({i}) to stack...")
                 time.sleep(5)
-                placeholder.empty()
 
+            placeholder.empty()
             with col1:
                 st.success("All function calls pushed to stack!")
             
@@ -94,89 +89,86 @@ def render_stack_tab():
             with col1:
                 st.write("**Phase 2: Calculating and Returning**")
 
-            # Khởi tạo result_map nếu chưa có
+            # Initialize result_map if not exists
             if 'result_map' not in st.session_state:
                 st.session_state['result_map'] = {}
 
-            # Khởi tạo bước hiện tại trong phase 2
+            # Initialize current step in phase 2
             if 'phase2_step' not in st.session_state:
-                st.session_state['phase2_step'] = 1  # bắt đầu từ factorial(1)
+                st.session_state['phase2_step'] = 1
 
             current_n = st.session_state['phase2_step']
 
-            # Nếu chưa vượt quá n
+            # If not exceeding n
             if current_n <= factorial_n:
                 idx_in_stack = factorial_n - current_n
+                call = st.session_state['recursion_stack'][idx_in_stack]
 
-                if idx_in_stack < len(st.session_state['recursion_stack']):
-                    call = st.session_state['recursion_stack'][idx_in_stack]
-                    if call['parameter'] == current_n and call['status'] != 'completed':
+                # Calculate result
+                if current_n == 1:
+                    result = 1
+                    calc_text = "Base case: factorial(1) = 1"
+                else:
+                    prev_result = st.session_state['result_map'][current_n - 1]
+                    result = current_n * prev_result
+                    calc_text = f"factorial({current_n}) = {current_n} × {prev_result} = {result}"
 
-                        # Tính toán kết quả
-                        if current_n == 1:
-                            result = 1
-                            calc_text = "Base case: factorial(1) = 1"
-                        else:
-                            prev_result = st.session_state['result_map'].get(current_n - 1, 1)
-                            result = current_n * prev_result
-                            calc_text = f"factorial({current_n}) = {current_n} × {prev_result} = {result}"
+                st.session_state['result_map'][current_n] = result
+                st.session_state['recursion_stack'][idx_in_stack]['status'] = 'calculating'
+                st.session_state['recursion_stack'][idx_in_stack]['result'] = result
 
-                        st.session_state['result_map'][current_n] = result
-                        st.session_state['recursion_stack'][idx_in_stack]['status'] = 'calculating'
-                        st.session_state['recursion_stack'][idx_in_stack]['result'] = result
-
-                        # Xóa sạch và render lại stack
-                        stack_placeholder.empty()
-                        with stack_placeholder.container():
-                            st.write("**Call Stack:**")
-                            active_calls = [call for call in st.session_state['recursion_stack'] if call['status'] != 'completed']
-                            if not active_calls:
-                                st.info("Stack is empty - All calls completed!")
+                # Update stack visualization
+                stack_placeholder.empty()
+                with stack_placeholder.container():
+                    st.write("**Call Stack:**")
+                    active_calls = [call for call in st.session_state['recursion_stack'] if call['status'] != 'completed']
+                    
+                    if not active_calls:
+                        st.info("Stack is empty - All calls completed!")
+                    else:
+                        for _, call_inner in enumerate(reversed(active_calls)):
+                            if call_inner['parameter'] == current_n:
+                                expander_title = f"{call_inner['function']} - CALCULATING"
+                                expanded_fl = True
                             else:
-                                for idx_inner, call_inner in enumerate(reversed(active_calls)):
-                                    if call_inner['parameter'] == current_n:
-                                        expander_title = f"{call_inner['function']} - CALCULATING"
-                                        expanded_fl = True
+                                expander_title = f"{call_inner['function']}"
+                                expanded_fl = False
+
+                            with st.expander(expander_title, expanded=expanded_fl):
+                                st.write(f"**Function:** `{call_inner['function']}`")
+                                st.write(f"**Parameter:** {call_inner['parameter']}")
+                                st.write(f"**Status:** {call_inner['status'].title()}")
+                                
+                                if call_inner['result'] is not None:
+                                    st.success(f"**Result:** {call_inner['result']}")
+                                    if call_inner['parameter'] == 1:
+                                        st.write("**Calculation:** Base case returns 1")
                                     else:
-                                        expander_title = f"{call_inner['function']}"
-                                        expanded_fl = False
+                                        prev = st.session_state['result_map'][call_inner['parameter'] - 1]
+                                        st.write(f"**Calculation:** {call_inner['parameter']} × factorial({call_inner['parameter']-1}) = {call_inner['parameter']} × {prev} = {call_inner['result']}")
+                                else:
+                                    st.write("**Result:** Waiting...")
 
-                                    with st.expander(expander_title, expanded=expanded_fl):
-                                        st.write(f"**Function:** `{call_inner['function']}`")
-                                        st.write(f"**Parameter:** {call_inner['parameter']}")
-                                        st.write(f"**Status:** {call_inner['status'].title()}")
-                                        if call_inner['result'] is not None:
-                                            st.success(f"**Result:** {call_inner['result']}")
-                                            if call_inner['parameter'] == 1:
-                                                st.write("**Calculation:** Base case returns 1")
-                                            else:
-                                                prev = st.session_state['result_map'].get(call_inner['parameter'] - 1, 1)
-                                                st.write(f"**Calculation:** {call_inner['parameter']} × factorial({call_inner['parameter']-1}) = {call_inner['parameter']} × {prev} = {call_inner['result']}")
-                                        else:
-                                            st.write("**Result:** Waiting...")
+                # Display status
+                placeholder.info(f"{calc_text}")
+                time.sleep(3)
 
-                        # Hiển thị trạng thái
-                        placeholder.info(f"{calc_text}")
-                        time.sleep(3)  # Chờ 2s 
+                # Mark as completed
+                st.session_state['recursion_stack'][idx_in_stack]['status'] = 'completed'
+                placeholder.success(f"Returned: factorial({current_n}) = {result}")
 
-                        # Đánh dấu hoàn thành
-                        st.session_state['recursion_stack'][idx_in_stack]['status'] = 'completed'
-                        placeholder.success(f"Returned: factorial({current_n}) = {result}")
-                        placeholder.empty()
-
-
-                        # Tăng bước và rerun để tiếp tục bước tiếp theo
-                        st.session_state['phase2_step'] += 1
-                        st.rerun()  
+                # Increment step and rerun for next iteration
+                st.session_state['phase2_step'] += 1
+                st.rerun()
 
             else:
-                # Đã hoàn thành tất cả các bước
-                st.session_state['final_result'] = st.session_state['result_map'].get(factorial_n, 1)
+                # All steps completed
+                st.session_state['final_result'] = st.session_state['result_map'][factorial_n]
                 st.session_state['is_calculating'] = False
                 st.session_state['current_phase'] = 0
-                del st.session_state['phase2_step']  # dọn sạch
+                del st.session_state['phase2_step']
 
-                # Hiển thị stack rỗng
+                # Display empty stack
                 stack_placeholder.empty()
                 with stack_placeholder.container():
                     st.write("**Call Stack:**")
@@ -185,7 +177,7 @@ def render_stack_tab():
                 with col1:
                     st.write(f"Final Result: {factorial_n}! = {st.session_state['final_result']}")
         
-    elif not st.session_state['is_calculating'] and not st.session_state['recursion_stack']:
+    else:
         with stack_placeholder:
             st.info("Click **Calculate Factorial** to visualize recursion.")
     
@@ -196,4 +188,9 @@ def render_stack_tab():
             st.session_state['final_result'] = None
             st.session_state['current_phase'] = 0
             st.session_state['stack_built'] = False
+            if 'result_map' in st.session_state:
+                del st.session_state['result_map']
+            if 'phase2_step' in st.session_state:
+                del st.session_state['phase2_step']
             st.rerun()
+

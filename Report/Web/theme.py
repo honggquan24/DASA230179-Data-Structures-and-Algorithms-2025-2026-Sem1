@@ -32,59 +32,44 @@ def get_css(theme: dict) -> str:
 
     # Xác định nếu là light mode để điều chỉnh CSS
     is_light = t["bg1"] == "#ffffff" or t["text"] == "#1a1a1a"
-
-    # Màu nền panel chính — trong light mode nên đậm hơn để text nổi
-    panel_bg = "rgba(255,255,255, var(--panel-alpha))" if not is_light else "rgba(255,255,255, 0.85)"
-    panel_border = "rgba(255,255,255, 0.1)" if not is_light else "rgba(0,0,0,0.08)"
-
-    # Màu shadow cho main content — tối hơn trong light mode
-    shadow_color = "rgba(0, 0, 0, 0.3)" if not is_light else "rgba(0, 0, 0, 0.08)"
-
-    # Màu nền gradient cho chữ heading — giữ nguyên nhưng điều chỉnh shadow cho dễ đọc
-    heading_shadow = (
-        "0 0 30px color-mix(in oklab, var(--accent) 35%, transparent)" if not is_light
-        else "0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent)"
-    )
-
-    # Màu nền contact section
-    contact_bg = (
-        "color-mix(in oklab, var(--accent) 15%, transparent)" if not is_light
-        else "color-mix(in oklab, var(--accent) 5%, white)"
-    )
-    contact_border = (
-        "color-mix(in oklab, var(--accent) 40%, transparent)" if not is_light
-        else "color-mix(in oklab, var(--accent) 20%, white)"
-    )
-    contact_shadow = (
-        "0 4px 20px color-mix(in oklab, var(--accent) 12%, transparent)" if not is_light
-        else "0 2px 8px color-mix(in oklab, var(--accent) 8%, transparent)"
-    )
-
-    # Social container background
-    social_container_bg = (
-        "rgba(255,255,255,0.05)" if not is_light else "rgba(0,0,0,0.03)"
-    )
-    social_container_border = (
-        "rgba(255,255,255,0.1)" if not is_light else "rgba(0,0,0,0.08)"
-    )
-
-    # Gradient cho scrollbar thumb
-    scrollbar_thumb_bg = (
-        "linear-gradient(135deg, var(--accent), var(--accent2))" if not is_light
-        else "linear-gradient(135deg, var(--accent), var(--accent2))"
-    )
-    scrollbar_track_bg = (
-        "rgba(255,255,255,0.1)" if not is_light else "rgba(0,0,0,0.05)"
-    )
-
-    # Input và Button styling - đồng bộ với theme
-    input_bg = "rgba(255,255,255,0.08)" if not is_light else "rgba(255,255,255,0.9)"
-    input_border = "rgba(255,255,255,0.15)" if not is_light else "rgba(0,0,0,0.12)"
-    input_focus_border = "var(--accent)" if not is_light else "var(--accent)"
-    
-    button_bg = "linear-gradient(135deg, var(--accent), var(--accent2))" if not is_light else "linear-gradient(135deg, var(--accent), var(--accent2))"
-    button_text = "#ffffff" if not is_light else "#ffffff"
-    button_shadow = "0 4px 15px color-mix(in oklab, var(--accent) 25%, transparent)" if not is_light else "0 2px 8px color-mix(in oklab, var(--accent) 20%, transparent)"
+    if not is_light:
+        # === DARK MODE ===
+        panel_bg = "rgba(255,255,255, var(--panel-alpha))"
+        panel_border = "rgba(255,255,255, 0.1)"
+        shadow_color = "rgba(0, 0, 0, 0.3)"
+        heading_shadow = "0 0 30px color-mix(in oklab, var(--accent) 35%, transparent)"
+        contact_bg = "color-mix(in oklab, var(--accent) 15%, transparent)"
+        contact_border = "color-mix(in oklab, var(--accent) 40%, transparent)"
+        contact_shadow = "0 4px 20px color-mix(in oklab, var(--accent) 12%, transparent)"
+        social_container_bg = "rgba(255,255,255,0.05)"
+        social_container_border = "rgba(255,255,255,0.1)"
+        scrollbar_thumb_bg = "linear-gradient(135deg, var(--accent), var(--accent2))"
+        scrollbar_track_bg = "rgba(255,255,255,0.1)"
+        input_bg = "rgba(255,255,255,0.08)"
+        input_border = "rgba(255,255,255,0.15)"
+        input_focus_border = "var(--accent)"
+        button_bg = "linear-gradient(135deg, var(--accent), var(--accent2))"
+        button_text = "#ffffff"
+        button_shadow = "0 4px 15px color-mix(in oklab, var(--accent) 25%, transparent)"
+    else:
+        # === LIGHT MODE ===
+        panel_bg = "rgba(255,255,255, 0.85)"
+        panel_border = "rgba(0,0,0, 0.08)"
+        shadow_color = "rgba(0, 0, 0, 0.08)"
+        heading_shadow = "0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent)"
+        contact_bg = "color-mix(in oklab, var(--accent) 5%, white)"
+        contact_border = "color-mix(in oklab, var(--accent) 20%, white)"
+        contact_shadow = "0 2px 8px color-mix(in oklab, var(--accent) 8%, transparent)"
+        social_container_bg = "rgba(0,0,0,0.03)"
+        social_container_border = "rgba(0,0,0,0.08)"
+        scrollbar_thumb_bg = "linear-gradient(135deg, var(--accent), var(--accent2))"
+        scrollbar_track_bg = "rgba(0,0,0,0.05)"
+        input_bg = "rgba(255,255,255,0.9)"
+        input_border = "rgba(0,0,0,0.12)"
+        input_focus_border = "var(--accent)"
+        button_bg = "linear-gradient(135deg, var(--accent), var(--accent2))"
+        button_text = "#ffffff"
+        button_shadow = "0 2px 8px color-mix(in oklab, var(--accent) 20%, transparent)"
 
     return dedent(f"""
     <head>
@@ -270,7 +255,6 @@ def get_css(theme: dict) -> str:
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
     .stTextArea > div > div > textarea,
-    .stSelectbox > div > div > div,
     input[type="text"],
     input[type="number"],
     textarea {{
@@ -337,6 +321,56 @@ def get_css(theme: dict) -> str:
     button[data-testid="baseButton-secondary"]:active {{
         transform: translateY(0) scale(1) !important;
         box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent) !important;
+    }}
+
+    /* Fix cho st.code() blocks */
+    .stCodeBlock {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+    }}
+
+    .stCodeBlock code {{
+        background: transparent !important;
+        color: var(--text) !important;
+    }}
+
+    /* Fix cho code inline */
+    code {{
+        background: {input_bg} !important;
+        color: var(--accent) !important;
+        padding: 0.2rem 0.4rem !important;
+        border-radius: 4px !important;
+        font-family: 'Courier New', monospace !important;
+    }}
+
+    /* Fix cho st.expander */
+    .streamlit-expanderHeader {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+        color: var(--text) !important;
+    }}
+
+    .streamlit-expanderContent {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-top: none !important;
+        border-radius: 0 0 10px 10px !important;
+        color: var(--text) !important;
+    }}
+
+    details[open] summary {{
+        border-radius: 10px 10px 0 0 !important;
+    }}
+
+    /* Fix cho pre blocks */
+    pre {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+        padding: 1rem !important;
+        color: var(--text) !important;
     }}
 
     /* Streamlit specific button fixes */
@@ -421,6 +455,36 @@ def get_css(theme: dict) -> str:
         border-radius: 10px !important;
         padding: 1rem !important;
         backdrop-filter: blur(var(--blur)) !important;
+    }}
+
+    /* Fix cho tất cả code blocks và pre elements */
+    .stCodeBlock, 
+    [data-testid="stCodeBlock"],
+    .stMarkdown pre,
+    div[data-testid="stMarkdownContainer"] pre {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        border-radius: 10px !important;
+    }}
+
+    .stCodeBlock code,
+    [data-testid="stCodeBlock"] code,
+    .stMarkdown pre code,
+    div[data-testid="stMarkdownContainer"] pre code {{
+        background: transparent !important;
+        color: var(--text) !important;
+    }}
+
+    /* Override Streamlit's default dark code background */
+    pre, pre[class*="language-"] {{
+        background: {input_bg} !important;
+        border: 1px solid {input_border} !important;
+        color: var(--text) !important;
+    }}
+
+    code, code[class*="language-"] {{
+        background: transparent !important;
+        color: var(--text) !important;
     }}
     </style>
     """).strip()

@@ -32,12 +32,11 @@ def render_stack_tab():
         
         with btn_col1:
             # Push operation
-            if st.button('Push', key='push', width= 'stretch'):
+            if st.button('Push', key='push', use_container_width=True):
                 if value and value.strip():
                     st.session_state['array_stack'].append(value.strip())
-                    st.session_state['last_operation'] = f"[PUSH]: Added '" + value.strip() + "' to stack"
+                    st.session_state['last_operation'] = f"[PUSH]: Added '{value.strip()}' to stack"
                     st.session_state['operation_result'] = "success"
-                    # Clear input by rerunning
                     st.rerun()
                 else:
                     st.session_state['last_operation'] = "[PUSH]: Please enter a valid value"
@@ -45,12 +44,11 @@ def render_stack_tab():
         
         with btn_col2:
             # Pop operation
-            if st.button('Pop', key='pop', width= 'stretch'):
+            if st.button('Pop', key='pop', use_container_width=True):
                 if st.session_state['array_stack']:
                     popped_value = st.session_state['array_stack'].pop()
-                    st.session_state['last_operation'] = "[POP]: Removed '" + popped_value + "' from stack"
+                    st.session_state['last_operation'] = f"[POP]: Removed '{popped_value}' from stack"
                     st.session_state['operation_result'] = "success"
-                    # Clear input by rerunning
                     st.rerun()
                 else:
                     st.session_state['last_operation'] = "[POP]: Stack is empty, cannot pop"
@@ -58,7 +56,7 @@ def render_stack_tab():
         
         with btn_col3:
             # Peek operation
-            if st.button('Peek', key='peek', width= 'stretch'):
+            if st.button('Peek', key='peek', use_container_width=True):
                 if st.session_state['array_stack']:
                     top_value = st.session_state['array_stack'][-1]
                     st.session_state['last_operation'] = f"[PEEK]: Top element is '{top_value}'"
@@ -69,24 +67,24 @@ def render_stack_tab():
         
         with btn_col4:
             # isEmpty operation
-            if st.button('isEmpty', key='is_empty', width= 'stretch'):
+            if st.button('isEmpty', key='is_empty', use_container_width=True):
                 is_empty = (len(st.session_state['array_stack']) == 0)
                 if is_empty:
-                    st.session_state['last_operation'] = f"[IS_EMPTY]: Stack is empty"
+                    st.session_state['last_operation'] = "[IS_EMPTY]: Stack is empty"
                 else:
-                    st.session_state['last_operation'] = f"[IS_EMPTY]: Stack has elements"
+                    st.session_state['last_operation'] = "[IS_EMPTY]: Stack has elements"
                 st.session_state['operation_result'] = "info"
         
         with btn_col5:
             # Size operation
-            if st.button('Size', key='size', width= 'stretch'):
+            if st.button('Size', key='size', use_container_width=True):
                 size = len(st.session_state['array_stack'])
                 st.session_state['last_operation'] = f"[SIZE]: Stack size is {size}"
                 st.session_state['operation_result'] = "info"
         
         with btn_col6:
             # Clear stack operation
-            if st.button('Clear Stack', key='clear', width= 'stretch'):
+            if st.button('Clear Stack', key='clear', use_container_width=True):
                 st.session_state['array_stack'] = []
                 st.session_state['last_operation'] = "[CLEAR]: Cleared entire stack"
                 st.session_state['operation_result'] = "success"
@@ -105,7 +103,7 @@ def render_stack_tab():
             empty, col, empty = st.columns([1, 3, 1])
             # Display stack elements using expanders from top to bottom
             with col:
-                st.markdown("<br></br>", unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
                 for i in range(len(st.session_state['array_stack']) - 1, -1, -1):
                     element = st.session_state['array_stack'][i]
                     
@@ -130,5 +128,5 @@ def render_stack_tab():
                         st.write(f"**Size:** {sys.getsizeof(element)} bytes")
                         st.write(f"**Address:** 0x{id(element):x}")
         else:
-            st.markdown("<br></br>", unsafe_allow_html=True)
-            st.info(" Stack is empty - No elements")
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.info("Stack is empty - No elements")
